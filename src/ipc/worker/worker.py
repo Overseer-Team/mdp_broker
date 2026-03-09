@@ -34,11 +34,18 @@ async def _worker(service_name: str, broker_ip: str, broker_port: int, bot: BotT
         if request is None:
             break
 
-        await worker_.reply(await func(bot, request))
+        try:
+            result = await func(bot, request)
+        except Exception as e:
+            log.exception('Route handler %r raised an exception', service_name)
+            await worker_.reply({'error': f'{type(e).__name__}: {e}'})
+        else:
+            await worker_.reply(result)
 
 
 def log_errors(task: asyncio.Task):
-    log.error('An exception has been raised in an IPC worker (%s)', task.get_name(), exc_info=task.exception())
+    if not task.cancelled() and task.exception() is not None:
+        log.error('IPC worker %s died with an exception', task.get_name(), exc_info=task.exception())
 
 
 class IPC:
