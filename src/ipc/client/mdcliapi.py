@@ -50,6 +50,7 @@ class MDClient:
         request = [C_CLIENT, service] + [msgpack.packb(request, use_bin_type=True)]
 
         async with self.lock:
+            reply = None
             retries = 1
             while retries <= self.RETRIES:
                 log.debug('Sending multipart request: %s', request)
@@ -78,6 +79,6 @@ class MDClient:
                     else:
                         log.warning('Retry limit exhausted (%s/%s), aborting...', retries - 1, self.RETRIES)
                         break
-                    retries -= 1
+                    retries += 1
 
             return reply
