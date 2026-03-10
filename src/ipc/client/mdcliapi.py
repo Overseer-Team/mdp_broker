@@ -70,7 +70,7 @@ class MDClient:
                     reply_service = msg.pop(0)
                     assert service == reply_service
 
-                    reply = msgpack.unpackb(msg[1], raw=False)
+                    reply = msgpack.unpackb(msg[1], raw=False, strict_map_key=False)
                     break
                 else:
                     if retries <= self.RETRIES:
